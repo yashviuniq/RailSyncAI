@@ -33,6 +33,16 @@ cd backend
 python scripts/demo.py
 ```
 
+## Deployment
+
+**Backend (Render, free):** import the repo → New Web Service → Blueprint, or a
+manual Web Service with `rootDir = backend`, build `pip install -r requirements.txt`,
+start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Requires Python 3.11+.
+
+**Frontend (Vercel):** set `rootDir = frontend`, Framework Preset **Vite**.
+Add an environment variable `VITE_API_URL = https://<your-backend>.onrender.com`
+(the deployed backend URL) and redeploy. Locally it falls back to `/api` (dev proxy).
+
 ## Repo layout
 
 ```
