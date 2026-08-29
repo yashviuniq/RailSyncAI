@@ -1,0 +1,23 @@
+# kept local, not part of the app repo
+docs/
+ppt/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# generated synthetic datasets (rebuilt via app.data.dataset)
+backend/data/generated/
+
+# node / frontend build output
+node_modules/
+frontend/dist/
+
+# logs / editor / os
+*.log
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
