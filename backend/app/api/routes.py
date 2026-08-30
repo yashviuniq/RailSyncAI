@@ -21,6 +21,16 @@ def kpis(request: Request):
     return get_orch(request).kpis()
 
 
+@router.get("/alerts")
+def alerts(request: Request):
+    return get_orch(request).alerts()
+
+
+@router.get("/roles")
+def roles(request: Request):
+    return get_orch(request).snapshot()["roles"]
+
+
 @router.get("/tasks")
 def tasks(request: Request, section: str = Query(None)):
     orch = get_orch(request)
@@ -31,6 +41,11 @@ def tasks(request: Request, section: str = Query(None)):
     return tasks
 
 
+@router.post("/tasks/{task_id}/status")
+def update_task_status(request: Request, task_id: str, status: str = Query("IN_PROGRESS")):
+    return get_orch(request).update_task_status(task_id, status)
+
+
 @router.get("/opportunities")
 def opportunities(request: Request):
     return get_orch(request).snapshot()["opportunities"]
@@ -39,6 +54,12 @@ def opportunities(request: Request):
 @router.get("/weekly")
 def weekly(request: Request):
     return get_orch(request).snapshot()["weekly_plan"]
+
+
+@router.post("/plan/blocks/{block_id}/status")
+def update_block_status(request: Request, block_id: str,
+                        status: str = Query("APPROVED")):
+    return get_orch(request).update_block_status(block_id, status)
 
 
 @router.get("/monthly")
@@ -65,3 +86,19 @@ def whatif_critical_defect(request: Request, section_id: str = Query("SEC-B")):
 def whatif_goods_train(request: Request, section_id: str = Query("SEC-B"),
                        entry_minute: int = Query(140)):
     return get_orch(request).add_goods_train(section_id, entry_minute)
+
+
+@router.post("/whatif/cancel-block")
+def whatif_cancel_block(request: Request, block_id: str = Query("")):
+    return get_orch(request).cancel_block(block_id)
+
+
+@router.post("/whatif/extend-block")
+def whatif_extend_block(request: Request, block_id: str = Query(""),
+                        minutes: int = Query(30)):
+    return get_orch(request).extend_block(block_id, minutes)
+
+
+@router.post("/whatif/crew-unavailable")
+def whatif_crew_unavailable(request: Request, department: str = Query("Electrical")):
+    return get_orch(request).crew_unavailable(department)

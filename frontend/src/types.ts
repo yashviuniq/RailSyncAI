@@ -91,12 +91,51 @@ export interface MonthlyPlan {
 export interface Kpis {
   tasks_total: number;
   tasks_open: number;
-  critical_open: number;
   tasks_scheduled: number;
+  tasks_completed: number;
+  critical_open: number;
+  backlog_pct: number;
+  asset_availability_pct: number;
   blocks: number;
+  solo_blocks: number;
   combined_blocks: number;
   block_utilization_pct: number;
+  unused_block_min: number;
+  total_block_min: number;
+  scheduled_task_min: number;
   train_impact_total_min: number;
+  avg_train_delay_min: number;
+  train_delay_avoided_min: number;
+  maintenance_hours_saved: number;
+  resource_utilization_pct: number;
+}
+
+export interface Alert {
+  alert_id: string;
+  severity: 'emergency' | 'critical' | 'warning' | 'info';
+  kind: string;
+  message: string;
+  action: string;
+  section_id: string;
+}
+
+export interface DelayPrediction {
+  train_number: string;
+  train_name: string;
+  train_type: string;
+  sections: string[];
+  entry_minute: number;
+  expected_delay_min: number;
+  predicted_delay_min: number;
+}
+
+export interface Role {
+  id: string;
+  label: string;
+  department: string | null;
+  can_plan: boolean;
+  can_update: boolean;
+  all_tasks: boolean;
 }
 
 export interface BeforeAfter {
@@ -109,17 +148,30 @@ export interface WhatIfResult {
   new_task?: Task & { explanations?: string[]; priority?: string; inserted?: boolean };
   inserted?: boolean;
   recommendation?: string;
-  comparison: {
+  comparison?: {
     current: PlanSummary;
     alternative: PlanSummary;
+    moved_tasks?: Task[];
   };
-  updated_plan: Plan;
+  updated_plan?: Plan;
   new_train?: {
     train_number: string;
     train_name: string;
     entry_minute: number;
     sections: string[];
   };
+  moved_tasks?: Task[];
+  cancelled_block?: Block;
+  deferred_tasks?: Task[];
+  backlog_increase?: number;
+  risk_increase?: number;
+  block?: Block;
+  extension_minutes?: number;
+  additional_tasks?: Task[];
+  additional_trains_impacted?: number;
+  recommended?: boolean;
+  message?: string;
+  error?: string;
 }
 
 export interface PlanSummary {
@@ -134,9 +186,24 @@ export interface Snapshot {
   reference_date: string;
   network: { stations: Station[]; sections: Section[] };
   tasks: Task[];
+  trains: Array<{
+    train_number: string;
+    train_name: string;
+    train_type: string;
+    sections: string[];
+    direction: string;
+    entry_minute: number;
+    expected_delay_min: number;
+    goods_confidence: number;
+  }>;
   opportunities: Opportunity[];
   weekly_plan: Plan;
   monthly_plan: Plan;
   kpis: Kpis;
   before_after: BeforeAfter;
+  bdms_blocks: Block[];
+  alerts: Alert[];
+  delay_predictions: DelayPrediction[];
+  resources: { crews: Record<string, string[]>; machines: Record<string, string[]>; total_crews: number; total_machines: number };
+  roles: Role[];
 }

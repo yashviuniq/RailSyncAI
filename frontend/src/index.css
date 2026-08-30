@@ -2,22 +2,149 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-  background: #f1f5f9;
-  color: #0f172a;
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  :root {
+    /* Google / Material design tokens */
+    --gt-blue: #1a73e8;
+    --gt-blue-dark: #1967d2;
+    --gt-blue-light: #e8f0fe;
+    --gt-red: #ea4335;
+    --gt-red-dark: #d93025;
+    --gt-red-light: #fce8e6;
+    --gt-yellow: #f9ab00;
+    --gt-yellow-bright: #fbbc04;
+    --gt-yellow-light: #fef7e0;
+    --gt-green: #34a853;
+    --gt-green-dark: #188038;
+    --gt-green-light: #e6f4ea;
+    --gt-ink: #202124;
+    --gt-gray: #5f6368;
+    --gt-muted: #80868b;
+    --gt-line: #dadce0;
+    --gt-softline: #e8eaed;
+    --gt-bg: #f8f9fa;
+    --gt-card: #ffffff;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+    background: var(--gt-bg);
+    color: var(--gt-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--gt-line) transparent;
+  }
+  ::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--gt-line);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--gt-muted);
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
-::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
+@layer components {
+  /* Google-style surface card */
+  .g-card {
+    background: var(--gt-card);
+    border: 1px solid var(--gt-softline);
+    border-radius: 12px;
+    box-shadow:
+      0 1px 2px rgba(60, 64, 67, 0.08),
+      0 1px 3px 1px rgba(60, 64, 67, 0.06);
+  }
+
+  /* Google filled button */
+  .g-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 9999px;
+    padding: 8px 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: var(--gt-blue);
+    color: #fff;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+  }
+  .g-btn:hover {
+    background: var(--gt-blue-dark);
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
+  }
+  .g-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+    box-shadow: none;
+  }
+
+  .g-btn-tonal {
+    background: var(--gt-blue-light);
+    color: var(--gt-blue-dark);
+  }
+  .g-btn-tonal:hover {
+    background: #d8e5fb;
+  }
+
+  .g-btn-ghost {
+    background: transparent;
+    color: var(--gt-blue-dark);
+  }
+  .g-btn-ghost:hover {
+    background: var(--gt-blue-light);
+    box-shadow: none;
+  }
+
+  .g-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 9999px;
+    padding: 5px 14px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid var(--gt-line);
+    background: #fff;
+    color: var(--gt-gray);
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+    white-space: nowrap;
+  }
+  .g-chip:hover {
+    background: var(--gt-bg);
+  }
+  .g-chip-active {
+    background: var(--gt-blue-light);
+    border-color: var(--gt-blue);
+    color: var(--gt-blue-dark);
+  }
+
+  .g-input {
+    border: 1px solid var(--gt-line);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    background: #fff;
+    color: var(--gt-ink);
+    outline: none;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  }
+  .g-input:focus {
+    border-color: var(--gt-blue);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.25);
+  }
 }

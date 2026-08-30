@@ -29,7 +29,8 @@ class BlockOptimizer:
         self.max_os_hours = max_os_hours  # cap on one block length
 
     def optimize(self, opportunities: list[OpportunityPackage],
-                 reference_date: dt.date) -> MaintenancePlan:
+                 reference_date: dt.date,
+                 crews: Optional[list] = None) -> MaintenancePlan:
         """Select the highest-value non-overlapping set of opportunities."""
         model = cp_model.CpModel()
 
@@ -64,6 +65,25 @@ class BlockOptimizer:
         for _task_id, opp_indices in task_to_opps.items():
             if len(opp_indices) > 1:
                 model.Add(sum(x[i] for i in opp_indices) <= 1)
+
+        # Constraint: crew capacity per department (resource availability).
+        # Each department can only perform tasks whose total minutes fit within
+        # the aggregate daily shift hours of its crews.
+        if crews:
+            dept_capacity_min = {}
+            for c in crews:
+                dept_capacity_min[c.department.value] = (
+                    dept_capacity_min.get(c.department.value, 0) + c.daily_hours * 60
+                )
+            dept_usage_items: dict[str, list] = {}
+            for i, o in enumerate(opps):
+                for dept in {t.department.value for t in o.tasks}:
+                    minutes = sum(t.estimated_minutes for t in o.tasks
+                                  if t.department.value == dept)
+                    dept_usage_items.setdefault(dept, []).append((i, minutes))
+            for dept, items in dept_usage_items.items():
+                cap = dept_capacity_min.get(dept, 24 * 60)
+                model.Add(sum(m * x[i] for i, m in items) <= cap)
 
         # Objective: maximize total risk-weighted value
         model.Maximize(sum(values[i] * x[i] for i in range(n)))
@@ -115,7 +135,13 @@ class BlockOptimizer:
         total_impact = sum(b.train_impact_min for b in plan.blocks)
         total_block_min = sum((b.end_dt - b.start_dt).total_seconds() / 60
                               for b in plan.blocks)
-        total_used_min = sum(len(b.tasks) * 30 for b in plan.blocks)  # approx
+        # exact scheduled task minutes
+        task_min = {}
+        for o in all_opps:
+            for t in o.tasks:
+                task_min.setdefault(t.task_id, t.estimated_minutes)
+        total_used_min = sum(task_min.get(tid, 30) for b in plan.blocks
+                             for tid in b.tasks)
         return {
             "blocks": len(plan.blocks),
             "tasks_scheduled": n_tasks,
@@ -123,5 +149,8 @@ class BlockOptimizer:
             "solo_blocks": solo,
             "train_impact_total_min": total_impact,
             "total_block_minutes": total_block_min,
+            "used_minutes": total_used_min,
+            "block_utilization_pct": round(
+                (total_used_min / max(total_block_min, 1)) * 100, 1),
             "solver_status": str(cp_model.CpSolverStatus(status)),
         }

@@ -33,7 +33,7 @@ def run_pipeline(ds: Dataset, reference_date: dt.date,
     opportunities = opp_engine.find_opportunities(ds.tasks)
 
     optimizer = BlockOptimizer(max_os_hours=max_os_hours)
-    plan = optimizer.optimize(opportunities, reference_date)
+    plan = optimizer.optimize(opportunities, reference_date, crews=ds.crews)
     return {
         "risk_results": risk_results,
         "opportunities": opportunities,
@@ -79,6 +79,20 @@ class WhatIfScenario:
         ds.trains.append(train)
         return ds, train
 
+    def remove_crew(self, department: Department) -> list:
+        """Simulates a crew becoming unavailable for the day (machine failure /
+        shortfall). Removes one crew of the department from a working copy."""
+        ds = self._copy()
+        removed = []
+        kept = []
+        for c in ds.crews:
+            if c.department == department and len(removed) == 0:
+                removed.append(c)
+            else:
+                kept.append(c)
+        ds.crews = kept
+        return ds, removed
+
     def _copy(self) -> Dataset:
         import copy
         ds = copy.deepcopy(self.base_ds)
@@ -90,7 +104,18 @@ class WhatIfScenario:
         return {
             "current": self._plan_summary(base),
             "alternative": self._plan_summary(mutated_plan),
+            "moved_tasks": self.moved_tasks_between(base, mutated_plan),
         }
+
+    def moved_tasks_between(self, base_plan: MaintenancePlan,
+                            new_plan: MaintenancePlan) -> list[MaintenanceTask]:
+        """Tasks scheduled before but not after a mutation -> displaced work."""
+        base_ids = {tid for b in base_plan.blocks for tid in b.tasks}
+        new_ids = {tid for b in new_plan.blocks for tid in b.tasks}
+        task_by_id = {t.task_id: t for t in self.base_ds.tasks}
+        moved = [t for tid, t in task_by_id.items()
+                 if tid in base_ids and tid not in new_ids]
+        return sorted(moved, key=lambda t: t.risk_score, reverse=True)
 
     def _current_base_plan(self) -> MaintenancePlan:
         result = run_pipeline(self.base_ds, self.ref)

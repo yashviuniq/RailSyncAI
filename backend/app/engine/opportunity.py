@@ -65,6 +65,7 @@ class OpportunityEngine:
                 if not selected:
                     continue
                 impact = self.traffic.train_conflicts_in(section_id, start_min, end_min)
+                nearby = self.traffic.nearby_trains(section_id, start_min, end_min)
                 depts = sorted({t.department for t in selected},
                                key=lambda d: d.value)
                 # If critical work required extension beyond the free window,
@@ -74,6 +75,10 @@ class OpportunityEngine:
                 end_min = min(end_min, 23 * 60 + 59)
                 if end_min - start_min < min_window_min:
                     continue
+                # No train is blocked (window is genuinely free); the 'impact'
+                # is the estimated patrol/speed-restriction effect on nearby
+                # passing trains (~2 min each, otherwise 0 if truly empty).
+                impact_min = len(nearby) * 2
                 opp = OpportunityPackage(
                     opportunity_id=f"OPP-{opp_counter:03d}",
                     section_id=section_id,
@@ -84,7 +89,7 @@ class OpportunityEngine:
                     available_window_minutes=win_len,
                     tasks=selected,
                     departments=depts,
-                    train_impact_min=len(impact),
+                    train_impact_min=impact_min,
                     opportunity_score=score,
                     reasons=reasons,
                 )

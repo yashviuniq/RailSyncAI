@@ -101,3 +101,20 @@ class TrafficModel:
                 if num not in affected:
                     affected.append(num)
         return affected
+
+    def nearby_trains(self, section_id: str, start_min: int, end_min: int,
+                      pad_min: int = 30) -> list[str]:
+        """Unique train numbers passing just before/after the window (within pad).
+
+        These trains are not blocked, but crews/patrols in the section may
+        impose a small speed-restriction impact -- used for an honest estimate
+        of 'expected train impact' for a maintenance block.
+        """
+        occ = self.occupancy.get(section_id, {})
+        nearby = []
+        for slot in range(_to_slot(max(0, start_min - pad_min)),
+                           _to_slot(end_min + pad_min) + 1):
+            for num in occ.get(slot, []):
+                if num not in nearby:
+                    nearby.append(num)
+        return nearby
