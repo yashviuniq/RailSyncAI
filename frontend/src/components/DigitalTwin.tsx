@@ -1,13 +1,16 @@
 import { Map, Activity, Sparkles, AlertTriangle } from 'lucide-react';
-import type { Section, Station, Task, Opportunity } from '../types';
+import type { Section, Station, Task, Opportunity, Snapshot } from '../types';
 import { fmtTime, DEPT_COLORS, trafficColor } from '../utils';
 import { Panel, Badge } from './Panel';
+import { SimulationMap } from './SimulationMap';
 
 export function DigitalTwin({
   stations,
   sections,
   tasks,
   opportunities,
+  trains,
+  blocks,
   selectedSection,
   onSelect,
 }: {
@@ -15,16 +18,32 @@ export function DigitalTwin({
   sections: Section[];
   tasks: Task[];
   opportunities: Opportunity[];
+  trains: Snapshot['trains'];
+  blocks: Snapshot['bdms_blocks'];
   selectedSection: string;
   onSelect: (id: string) => void;
 }) {
   return (
     <Panel
       title="Railway Corridor — Digital Twin"
-      subtitle="Schematic view · click a section for health, workload and the next bundled opportunity"
+      subtitle="Live map simulation · click a section for problem state, health and scheduling"
       icon={<Map className="w-4 h-4" />}
-      actions={<Badge className="bg-[#f8f9fa] text-google-muted">schematic · prototype data</Badge>}
+      actions={<Badge className="bg-[#f8f9fa] text-google-muted">live simulation · prototype data</Badge>}
     >
+      <SimulationMap
+        stations={stations}
+        sections={sections}
+        tasks={tasks}
+        trains={trains}
+        blocks={blocks}
+        selectedSection={selectedSection}
+        onSelect={onSelect}
+      />
+
+      <div className="mt-5 pt-4 border-t border-google-softline">
+        <p className="text-[11px] uppercase tracking-wide text-google-muted font-medium mb-3">
+          Section health schematic
+        </p>
       <div className="flex items-center min-w-[880px]">
         {stations.map((st, idx) => (
           <div key={st.id} className="flex items-center">
@@ -65,6 +84,7 @@ export function DigitalTwin({
         <span className="ml-auto inline-flex items-center gap-1 text-google-muted">
           <Activity className="w-3.5 h-3.5" /> Track · OHE · Signal health shown on selection
         </span>
+      </div>
       </div>
     </Panel>
   );

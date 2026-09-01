@@ -260,6 +260,8 @@ export default function App() {
                   sections={snap.network.sections}
                   tasks={snap.tasks}
                   opportunities={snap.opportunities}
+                  trains={snap.trains}
+                  blocks={snap.bdms_blocks}
                   selectedSection={selectedSection}
                   onSelect={setSelectedSection}
                 />
