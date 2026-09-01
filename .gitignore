@@ -21,3 +21,10 @@ frontend/dist/
 .idea/
 .DS_Store
 Thumbs.db
+
+# env files (tracked: .env.example); ignore local/secret variants
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env.local

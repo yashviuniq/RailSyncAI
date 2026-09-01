@@ -1,11 +1,16 @@
 """FastAPI application for the Railway Maintenance Orchestrator."""
 from __future__ import annotations
 
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router
 from app.engine.orchestrator import Orchestrator
+
+load_dotenv()
 
 app = FastAPI(
     title="Railway Maintenance Orchestrator",
@@ -14,9 +19,17 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Read allowed origins from env. Defaults to "*" (open) for convenience.
+_cors_origins = os.getenv("CORS_ORIGINS", "*")
+cors_origins = (
+    [o.strip() for o in _cors_origins.split(",") if o.strip()]
+    if _cors_origins != "*"
+    else ["*"]
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
